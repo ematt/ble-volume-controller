@@ -1,0 +1,65 @@
+{
+    "files.associations": {
+		"boards.h": "c",
+		"nrf_delay.h": "c",
+		"nrf_drv_gpiote.h": "c",
+		"nrfx_gpiote.h": "c",
+		"sparkfun_nrf52840_mini.h": "c",
+		"nrf_drv_timer.h": "c",
+		"nrfx_timer.h": "c",
+		"nrf_timer.h": "c",
+		"nrfx.h": "c",
+		"ble_advertising.h": "c",
+		"peer_manager_handler.h": "c",
+		"nrf_pwr_mgmt.h": "c",
+		"encoder.h": "c",
+		"includes.h": "c",
+		"app_util.h": "c"
+	},
+
+    "actionButtons": {
+   	 "defaultColor": "white", // Can also use string color names.
+   	 "loadNpmCommands":false, // Disables automatic generation of actions for npm commands.
+   	 "reloadButton":"♻️", // Custom reload button text or icon (default ↻). null value enables automatic reload on configuration change
+   	 "commands": [
+		{
+			//"cwd": "D:/sys/VMs/vagrant", 	// Terminal initial folder ${workspaceFolder} and os user home as defaults
+			"name": "Vagrant up",
+			//"color": "green",
+			"singleInstance": true,
+			"command": "vagrant up", // This is executed in the terminal.
+		},
+		{
+			//"cwd": "D:/sys/VMs/vagrant", 	// Terminal initial folder ${workspaceFolder} and os user home as defaults
+			"name": "Vagrant ssh",
+			//"color": "green",
+			"singleInstance": true,
+			"command": "vagrant ssh", // This is executed in the terminal.
+		},
+		{
+			//"cwd": "D:/sys/VMs/vagrant", 	// Terminal initial folder ${workspaceFolder} and os user home as defaults
+			"name": "Vagrant make",
+			//"color": "green",
+			"singleInstance": true,
+			"command": "vagrant ssh -c \"cd ~/project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make\"", // This is executed in the terminal.
+		},
+		{
+			"name": "Gen DFU",
+			//"color": "green",
+			"command": "cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip",
+		},
+		{
+			"name": "Bootload",
+			//"color": "green",
+			"command": "cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM11 -b 115200 --singlebank --touch 1200",
+   		 },
+		{
+			//"cwd": "D:/sys/VMs/vagrant", 
+			"name": "make & flash",
+			"singleInstance": true,
+			//"color": "green",
+			"command": "vagrant ssh -c \"cd ~/project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make\";cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM11 -b 115200 --singlebank --touch 1200",
+		}
+   	 ]
+    }
+}
