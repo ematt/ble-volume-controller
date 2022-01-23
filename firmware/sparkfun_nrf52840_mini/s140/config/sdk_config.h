@@ -53,7 +53,7 @@
  
 
 #ifndef BSP_BTN_BLE_ENABLED
-#define BSP_BTN_BLE_ENABLED 1
+#define BSP_BTN_BLE_ENABLED 0
 #endif
 
 // </h> 
@@ -9139,7 +9139,7 @@
 // <e> APP_BUTTON_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef APP_BUTTON_CONFIG_LOG_ENABLED
-#define APP_BUTTON_CONFIG_LOG_ENABLED 0
+#define APP_BUTTON_CONFIG_LOG_ENABLED 1
 #endif
 // <o> APP_BUTTON_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -9150,7 +9150,7 @@
 // <4=> Debug 
 
 #ifndef APP_BUTTON_CONFIG_LOG_LEVEL
-#define APP_BUTTON_CONFIG_LOG_LEVEL 3
+#define APP_BUTTON_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> APP_BUTTON_CONFIG_INITIAL_LOG_LEVEL  - Initial severity level if dynamic filtering is enabled.
@@ -9166,7 +9166,7 @@
 // <4=> Debug 
 
 #ifndef APP_BUTTON_CONFIG_INITIAL_LOG_LEVEL
-#define APP_BUTTON_CONFIG_INITIAL_LOG_LEVEL 3
+#define APP_BUTTON_CONFIG_INITIAL_LOG_LEVEL 4
 #endif
 
 // <o> APP_BUTTON_CONFIG_INFO_COLOR  - ANSI escape code prefix.

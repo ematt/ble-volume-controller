@@ -1,0 +1,27 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Copy Includes",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "exec",
+                "-w", "/opt/gcc-arm-none-eabi-9-2020-q2-update",
+                "-it", "${workspaceFolderBasename}",
+                "sh",
+                "-c",
+				"mkdir -p /project/.includes && find . -name \"*.h\" | xargs cp --parents -t /project/.includes",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        
+        
+    ]
+}

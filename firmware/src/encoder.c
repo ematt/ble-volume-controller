@@ -1,10 +1,15 @@
 
 #include "includes.h"
 
+#define NRF_LOG_MODULE_NAME encoder
+#define NRF_LOG_LEVEL NRF_LOG_SEVERITY_WARNING
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+NRF_LOG_MODULE_REGISTER();
+
 #define ENC_PIN_A BSP_QSPI_IO2_PIN
 #define ENC_PIN_B BSP_QSPI_IO3_PIN
-
-#define PIN_OUT BSP_QSPI_IO1_PIN
 
 const uint32_t DEBOUNCE_TIME_MS = 4;
 
@@ -43,7 +48,7 @@ int8_t read_rotary()
 
 void enc_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    //NRF_LOG_INFO("enc_pin_A_handler");
+    NRF_LOG_DEBUG("enc_pin_A_handler");
     interrupPinAState = nrfx_gpiote_in_is_set(ENC_PIN_A);
 
     nrfx_timer_enable(&m_timer2);
@@ -53,7 +58,7 @@ void enc_pin_A_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 
 void enc_pin_B_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    //NRF_LOG_INFO("enc_pin_B_handler");
+    NRF_LOG_DEBUG("enc_pin_B_handler");
 
     nrfx_timer_enable(&m_timer2);
     nrf_drv_gpiote_in_event_disable(ENC_PIN_A);
@@ -64,8 +69,8 @@ void Timer_2_Interrupt_Handler(
     nrf_timer_event_t event_type,
     void *p_context)
 {
-    //NRF_LOG_INFO("Timer_2_Interrupt_Handler");
-    int8_t c, val;
+    NRF_LOG_DEBUG("Timer_2_Interrupt_Handler");
+    int8_t val;
     val = read_rotary();
 
     if (val)
@@ -90,9 +95,6 @@ void Timer_2_Interrupt_Handler(
 
     if (interrupPinAState == pinAState)
     {
-        nrf_drv_gpiote_out_set(PIN_OUT);
-        //NRF_LOG_INFO("Debounce OK");
-
         if (pinAState)
         {
             if (pinBState)
@@ -105,8 +107,8 @@ void Timer_2_Interrupt_Handler(
             }
         }
     }
-    else
-        NRF_LOG_INFO("Debounce NOK");
+    else 
+        NRF_LOG_DEBUG("Debounce NOK");
 
     nrf_drv_gpiote_in_event_enable(ENC_PIN_A, true);
     nrfx_timer_disable(&m_timer2);
@@ -135,7 +137,6 @@ void encoder_init(enc_evt_handler_t evt_handler)
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_gpiote_in_event_enable(ENC_PIN_B, true);
-    //nrf_drv_gpiote_in_event_enable(ENC_PIN_B, false);
 
     enc_evt_handler = evt_handler;
 
@@ -149,9 +150,4 @@ void encoder_init(enc_evt_handler_t evt_handler)
 
     uint32_t time_ticks = nrfx_timer_ms_to_ticks(&m_timer2, DEBOUNCE_TIME_MS);
     nrfx_timer_extended_compare(&m_timer2, NRF_TIMER_CC_CHANNEL0, time_ticks, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
-
-    nrf_drv_gpiote_out_config_t out_config = GPIOTE_CONFIG_OUT_SIMPLE(false);
-
-    err_code = nrf_drv_gpiote_out_init(PIN_OUT, &out_config);
-    APP_ERROR_CHECK(err_code);
 }

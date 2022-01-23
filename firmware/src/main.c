@@ -55,6 +55,12 @@
 
 #include "includes.h"
 
+#define NRF_LOG_MODULE_NAME main
+#define NRF_LOG_LEVEL NRF_LOG_SEVERITY_INFO
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+NRF_LOG_MODULE_REGISTER();
 
 #define ENC_PUSH_SWITCH_PIN 21
 
@@ -64,10 +70,7 @@
 #define APP_BLE_OBSERVER_PRIO 3 /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1  /**< A tag identifying the SoftDevice BLE configuration. */
 
-#define BATTERY_LEVEL_MEAS_INTERVAL APP_TIMER_TICKS(2000) /**< Battery level measurement interval (ticks). */
-#define MIN_BATTERY_LEVEL 81                              /**< Minimum simulated battery level. */
-#define MAX_BATTERY_LEVEL 100                             /**< Maximum simulated battery level. */
-#define BATTERY_LEVEL_INCREMENT 1                         /**< Increment between each simulated battery level measurement. */
+#define BATTERY_LEVEL_MEAS_INTERVAL APP_TIMER_TICKS(60000) /**< Battery level measurement interval (ticks). */\
 
 #define PNP_ID_VENDOR_ID_SOURCE 0x02  /**< Vendor ID Source. */
 #define PNP_ID_VENDOR_ID 0x1915       /**< Vendor ID. */
@@ -152,8 +155,6 @@ BLE_ADVERTISING_DEF(m_advertising); /**< Advertising module instance. */
 static bool m_in_boot_mode = false;                      /**< Current protocol mode. */
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
 static pm_peer_id_t m_peer_id;                           /**< Device reference handle to the current bonded central. */
-static sensorsim_cfg_t m_battery_sim_cfg;                /**< Battery Level sensor simulator configuration. */
-static sensorsim_state_t m_battery_sim_state;            /**< Battery Level sensor simulator state. */
 static ble_uuid_t m_adv_uuids[] =                        /**< Universally unique service identifiers. */
     {
         {BLE_UUID_HUMAN_INTERFACE_DEVICE_SERVICE, BLE_UUID_TYPE_BLE}};
@@ -222,6 +223,16 @@ enum CONSUMER_BUTTON
     CONSUMER_BUTTON_VolumeIncrement = (1 << 5),
     CONSUMER_BUTTON_AcForward = (1 << 6),
     CONSUMER_BUTTON_AcBack = (1 << 7),
+};
+
+enum APP_BSP_EVENT
+{
+    APP_BSP_EVENT_BTN_1_PRESSED = BSP_EVENT_KEY_LAST,
+    APP_BSP_EVENT_BTN_1_RELEASED,
+    APP_BSP_EVENT_BTN_1_LONG_PRESS,
+    APP_BSP_EVENT_BTN_ENC_PRESSED,
+    APP_BSP_EVENT_BTN_ENC_RELEASED,
+    APP_BSP_EVENT_BTN_ENC_LONG_PRESS,
 };
 
 static void on_hids_evt(ble_hids_t *p_hids, ble_hids_evt_t *p_evt);
@@ -322,6 +333,11 @@ static void pm_evt_handler(pm_evt_t const *p_evt)
 
     switch (p_evt->evt_id)
     {
+    case PM_EVT_BONDED_PEER_CONNECTED:
+    {
+        NRF_LOG_INFO("Connected to a previously bonded device.");
+    } 
+    break;
     case PM_EVT_PEERS_DELETE_SUCCEEDED:
         advertising_start(false);
         break;
@@ -425,21 +441,7 @@ static void ble_advertising_error_handler(uint32_t nrf_error)
  */
 static void battery_level_update(void)
 {
-    // ret_code_t err_code;
-    // uint8_t battery_level;
-
-    // battery_level = (uint8_t)sensorsim_measure(&m_battery_sim_state, &m_battery_sim_cfg);
-
-    // err_code = ble_bas_battery_level_update(&m_bas, battery_level, BLE_CONN_HANDLE_ALL);
-    // if ((err_code != NRF_SUCCESS) &&
-    //     (err_code != NRF_ERROR_BUSY) &&
-    //     (err_code != NRF_ERROR_RESOURCES) &&
-    //     (err_code != NRF_ERROR_FORBIDDEN) &&
-    //     (err_code != NRF_ERROR_INVALID_STATE) &&
-    //     (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING))
-    // {
-    //     APP_ERROR_HANDLER(err_code);
-    // }
+    battery_run();
 }
 
 /**@brief Function for handling the Battery measurement timer timeout.
@@ -755,18 +757,6 @@ static void services_init(void)
     hids_init();
 }
 
-/**@brief Function for initializing the battery sensor simulator.
- */
-static void sensor_simulator_init(void)
-{
-    m_battery_sim_cfg.min = MIN_BATTERY_LEVEL;
-    m_battery_sim_cfg.max = MAX_BATTERY_LEVEL;
-    m_battery_sim_cfg.incr = BATTERY_LEVEL_INCREMENT;
-    m_battery_sim_cfg.start_at_max = true;
-
-    sensorsim_init(&m_battery_sim_state, &m_battery_sim_cfg);
-}
-
 /**@brief Function for handling a Connection Parameters error.
  *
  * @param[in]   nrf_error   Error code containing information about what went wrong.
@@ -818,10 +808,6 @@ static void sleep_mode_enter(void)
     ret_code_t err_code;
 
     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    APP_ERROR_CHECK(err_code);
-
-    // Prepare wakeup buttons.
-    err_code = bsp_btn_ble_sleep_mode_prepare();
     APP_ERROR_CHECK(err_code);
 
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
@@ -1370,6 +1356,9 @@ static void mouse_wheel_send(int16_t delta)
 static void bsp_event_handler(bsp_event_t event)
 {
     ret_code_t err_code;
+    static bool wasLongPress = false;
+
+    NRF_LOG_INFO("bsp_event_handler %d", event);
 
     switch (event)
     {
@@ -1397,6 +1386,30 @@ static void bsp_event_handler(bsp_event_t event)
         }
         break;
 
+    case APP_BSP_EVENT_BTN_1_PRESSED:
+        bsp_board_led_on(BSP_BOARD_LED_0);
+        break;
+    case APP_BSP_EVENT_BTN_1_RELEASED:
+        bsp_board_led_off(BSP_BOARD_LED_0);
+        break;
+    case APP_BSP_EVENT_BTN_1_LONG_PRESS:
+
+        break;
+    case APP_BSP_EVENT_BTN_ENC_PRESSED:
+        wasLongPress = false;
+        break;
+    case APP_BSP_EVENT_BTN_ENC_RELEASED:
+        if(!wasLongPress)
+        {
+            mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
+        }
+        mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
+        break;
+    case APP_BSP_EVENT_BTN_ENC_LONG_PRESS:
+        wasLongPress = true;
+        mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeIncrement);
+        break;
+
     default:
         break;
     }
@@ -1409,63 +1422,34 @@ static void bsp_event_handler(bsp_event_t event)
 static void buttons_leds_init(bool *p_erase_bonds)
 {
     ret_code_t err_code;
-    bsp_event_t startup_event;
 
-    err_code = bsp_init(BSP_INIT_LEDS, bsp_event_handler);
-
+    err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
-    err_code = bsp_btn_ble_init(NULL, &startup_event);
-    APP_ERROR_CHECK(err_code);
-
-    *p_erase_bonds = true;//(startup_event == BSP_EVENT_CLEAR_BONDING_DATA);
-}
-
-/**@brief Function for handling events from the button handler module.
- *
- * @param[in] pin_no        The pin that the event applies to.
- * @param[in] button_action The button action (press/release).
- */
-static void button_event_handler(uint8_t pin_no, uint8_t button_action)
-{
-    switch (pin_no)
+    NRF_LOG_INFO("Assign button events");
+    const struct 
     {
-        case ENC_PUSH_SWITCH_PIN:
-        {
-            if(button_action)
-                bsp_board_led_on(BSP_BOARD_LED_0);
-            else
-                bsp_board_led_off(BSP_BOARD_LED_0);
-        }
-            break;
-
-        case BUTTON_1:
-        {
-            mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
-        }
-        break;
-
-        default:
-            APP_ERROR_HANDLER(pin_no);
-            break;
-    }
-}
-
-/**@brief Function for initializing the button handler module.
- */
-static void buttons_init(void)
-{
-    ret_code_t err_code;
-
-    //The array must be static because a pointer to it will be saved in the button handler module.
-    static app_button_cfg_t buttons[] =
+        uint32_t button;
+        bsp_button_action_t action;
+        enum APP_BSP_EVENT event;
+    } map[] = 
     {
-        {BUTTON_1, false, NRF_GPIO_PIN_PULLUP, button_event_handler},
-        {ENC_PUSH_SWITCH_PIN, false, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_PUSH, APP_BSP_EVENT_BTN_1_PRESSED},
+        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_RELEASE, APP_BSP_EVENT_BTN_1_RELEASED},
+        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_LONG_PUSH, APP_BSP_EVENT_BTN_1_LONG_PRESS},
+        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_PUSH, APP_BSP_EVENT_BTN_ENC_PRESSED},
+        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_RELEASE, APP_BSP_EVENT_BTN_ENC_RELEASED},
+        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_LONG_PUSH, APP_BSP_EVENT_BTN_ENC_LONG_PRESS},
     };
 
-    err_code = app_button_init(buttons, ARRAY_SIZE(buttons), APP_TIMER_TICKS(50));
-    APP_ERROR_CHECK(err_code);
+    for(int i = 0; i < ARRAY_SIZE(map); i++)
+    {
+        err_code = bsp_event_to_button_action_assign(map[i].button, map[i].action, map[i].event);
+        APP_ERROR_CHECK(err_code);
+        NRF_LOG_INFO("bsp_event_to_button_action_assign %d", i);
+    }
+
+    *p_erase_bonds = false;
 }
 
 /**@brief Function for initializing the nrf log module.
@@ -1476,6 +1460,8 @@ static void log_init(void)
     APP_ERROR_CHECK(err_code);
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
+    
+    NRF_LOG_INFO("\033[2J\033[;H");
 }
 
 /**@brief Function for initializing power management.
@@ -1540,6 +1526,8 @@ void battery_evt_handler(battery_status_t state)
     }
 }
 
+
+
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -1557,15 +1545,11 @@ int main(void)
     gatt_init();
     advertising_init();
     services_init();
-    sensor_simulator_init();
     conn_params_init();
     peer_manager_init();
     encoder_init(encoder_handler);
-    buttons_init();
-    app_button_enable();
 
     // Start execution.
-    NRF_LOG_INFO("\033[2J\033[;H");
     NRF_LOG_INFO("HID Mouse example started.");
     timers_start();
     advertising_start(erase_bonds);

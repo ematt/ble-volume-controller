@@ -1,5 +1,12 @@
 #include "includes.h"
 
+#define NRF_LOG_MODULE_NAME battery
+#define NRF_LOG_LEVEL NRF_LOG_SEVERITY_INFO
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+NRF_LOG_MODULE_REGISTER();
+
 static battery_evt_handler_t _evt_handler = NULL;
 
 static battery_status_t _battery_state = {0};
@@ -27,7 +34,7 @@ void battery_run(void)
     current_battery_state.mv = battery_get_ADC_mV_value();
     current_battery_state.proc = battery_mv_to_percent(current_battery_state.mv);
     current_battery_state.state = battery_to_state(&current_battery_state);
-    NRF_LOG_INFO("%d, %d, %d", current_battery_state.mv, current_battery_state.proc, current_battery_state.state);
+    NRF_LOG_INFO("mV: %d, proc: %d%%, state: %d", current_battery_state.mv, current_battery_state.proc, current_battery_state.state);
 
     if(current_battery_state.proc != _battery_state.proc || current_battery_state.state != _battery_state.state)
     {

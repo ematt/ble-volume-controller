@@ -1,5 +1,6 @@
 *.log
 _build/
+.includes/
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode
@@ -10,6 +11,7 @@ _build/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/c_cpp_properties.json
 *.code-workspace
 
 ### VisualStudioCode Patch ###

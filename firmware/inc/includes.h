@@ -18,7 +18,7 @@
 #include "ble_dis.h"
 #include "ble_conn_params.h"
 #include "sensorsim.h"
-#include "bsp_btn_ble.h"
+#include "bsp.h"
 #include "app_scheduler.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
@@ -38,10 +38,6 @@
 #include "peer_manager_handler.h"
 #include "boards.h"
 #include "app_util_platform.h"
-
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
 
 #include "nrfx_timer.h"
 #include "nrf_timer.h"
