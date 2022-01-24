@@ -1,58 +1,3 @@
-/**
- * Copyright (c) 2014 - 2019, Nordic Semiconductor ASA
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
-/** @file
- *
- * @defgroup ble_sdk_app_hids_mouse_main main.c
- * @{
- * @ingroup ble_sdk_app_hids_mouse
- * @brief HID Mouse Sample Application main file.
- *
- * This file contains is the source code for a sample application using the HID, Battery and Device
- * Information Service for implementing a simple mouse functionality. This application uses the
- * @ref app_scheduler.
- *
- * Also it would accept pairing requests from any peer device. This implementation of the
- * application will not know whether a connected central is a known device or not.
- */
-
-
 #include "includes.h"
 
 #define NRF_LOG_MODULE_NAME main
@@ -62,26 +7,10 @@
 #include "nrf_log_default_backends.h"
 NRF_LOG_MODULE_REGISTER();
 
-#define ENC_PUSH_SWITCH_PIN 21
-
-#define DEVICE_NAME "nRF5_Mouse"                /**< Name of device. Will be included in the advertising data. */
-#define MANUFACTURER_NAME "NordicSemiconductor" /**< Manufacturer. Will be passed to Device Information Service. */
+#define DEVICE_NAME ABOUT_PROJECT_NAME                 /**< Name of device. Will be included in the advertising data. */
 
 #define APP_BLE_OBSERVER_PRIO 3 /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 #define APP_BLE_CONN_CFG_TAG 1  /**< A tag identifying the SoftDevice BLE configuration. */
-
-#define BATTERY_LEVEL_MEAS_INTERVAL APP_TIMER_TICKS(60000) /**< Battery level measurement interval (ticks). */\
-
-#define PNP_ID_VENDOR_ID_SOURCE 0x02  /**< Vendor ID Source. */
-#define PNP_ID_VENDOR_ID 0x1915       /**< Vendor ID. */
-#define PNP_ID_PRODUCT_ID 0xEEEE      /**< Product ID. */
-#define PNP_ID_PRODUCT_VERSION 0x0001 /**< Product Version. */
-
-
-#define PNP_MODEL_NUM_STR   "ModelNum"               /**< Model Number String. */
-#define PNP_SERIAL_NUM_STR  "123"              /**< Serial Number String. */
-#define PNP_HW_REV_STR  "0.01"                  /**< Hardware Revision String. */
-#define PNP_FW_REV_STR  "0.01"                  /**< Firmware Revision String. */
 
 /*lint -emacro(524, MIN_CONN_INTERVAL) // Loss of precision */
 #define MIN_CONN_INTERVAL MSEC_TO_UNITS(7.5, UNIT_1_25_MS) /**< Minimum connection interval (7.5 ms). */
@@ -141,8 +70,6 @@ NRF_LOG_MODULE_REGISTER();
 #define APP_ADV_FAST_DURATION 3000  /**< The advertising duration of fast advertising in units of 10 milliseconds. */
 #define APP_ADV_SLOW_DURATION 18000 /**< The advertising duration of slow advertising in units of 10 milliseconds. */
 
-APP_TIMER_DEF(m_battery_timer_id); /**< Battery timer. */
-BLE_BAS_DEF(m_bas);                /**< Battery service instance. */
 BLE_HIDS_DEF(m_hids,               /**< HID service instance. */
              NRF_SDH_BLE_TOTAL_LINK_COUNT,
              INPUT_REP_BUTTONS_LEN,
@@ -234,6 +161,8 @@ enum APP_BSP_EVENT
     APP_BSP_EVENT_BTN_ENC_RELEASED,
     APP_BSP_EVENT_BTN_ENC_LONG_PRESS,
 };
+
+static bool panelToggle = true;
 
 static void on_hids_evt(ble_hids_t *p_hids, ble_hids_evt_t *p_evt);
 
@@ -437,26 +366,6 @@ static void ble_advertising_error_handler(uint32_t nrf_error)
     APP_ERROR_HANDLER(nrf_error);
 }
 
-/**@brief Function for performing a battery measurement, and update the Battery Level characteristic in the Battery Service.
- */
-static void battery_level_update(void)
-{
-    battery_run();
-}
-
-/**@brief Function for handling the Battery measurement timer timeout.
- *
- * @details This function will be called each time the battery level measurement timer expires.
- *
- * @param[in]   p_context   Pointer used for passing some arbitrary information (context) from the
- *                          app_start_timer() call to the timeout handler.
- */
-static void battery_level_meas_timeout_handler(void *p_context)
-{
-    UNUSED_PARAMETER(p_context);
-    battery_level_update();
-}
-
 /**@brief Function for the Timer initialization.
  *
  * @details Initializes the timer module.
@@ -466,12 +375,6 @@ static void timers_init(void)
     ret_code_t err_code;
 
     err_code = app_timer_init();
-    APP_ERROR_CHECK(err_code);
-
-    // Create battery timer.
-    err_code = app_timer_create(&m_battery_timer_id,
-                                APP_TIMER_MODE_REPEATED,
-                                battery_level_meas_timeout_handler);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -538,56 +441,6 @@ static void qwr_init(void)
     qwr_init_obj.error_handler = nrf_qwr_error_handler;
 
     err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init_obj);
-    APP_ERROR_CHECK(err_code);
-}
-
-/**@brief Function for initializing Device Information Service.
- */
-static void dis_init(void)
-{
-    ret_code_t err_code;
-    ble_dis_init_t dis_init_obj;
-    ble_dis_pnp_id_t pnp_id;
-
-    pnp_id.vendor_id_source = PNP_ID_VENDOR_ID_SOURCE;
-    pnp_id.vendor_id = PNP_ID_VENDOR_ID;
-    pnp_id.product_id = PNP_ID_PRODUCT_ID;
-    pnp_id.product_version = PNP_ID_PRODUCT_VERSION;
-
-    memset(&dis_init_obj, 0, sizeof(dis_init_obj));
-
-    ble_srv_ascii_to_utf8(&dis_init_obj.manufact_name_str, MANUFACTURER_NAME);
-    ble_srv_ascii_to_utf8(&dis_init_obj.model_num_str, PNP_MODEL_NUM_STR);
-    ble_srv_ascii_to_utf8(&dis_init_obj.serial_num_str, PNP_SERIAL_NUM_STR);
-    ble_srv_ascii_to_utf8(&dis_init_obj.hw_rev_str, PNP_HW_REV_STR);
-    ble_srv_ascii_to_utf8(&dis_init_obj.fw_rev_str, PNP_FW_REV_STR);
-    dis_init_obj.p_pnp_id = &pnp_id;
-
-    dis_init_obj.dis_char_rd_sec = SEC_JUST_WORKS;
-
-    err_code = ble_dis_init(&dis_init_obj);
-    APP_ERROR_CHECK(err_code);
-}
-
-/**@brief Function for initializing Battery Service.
- */
-static void bas_init(void)
-{
-    ret_code_t err_code;
-    ble_bas_init_t bas_init_obj;
-
-    memset(&bas_init_obj, 0, sizeof(bas_init_obj));
-
-    bas_init_obj.evt_handler = NULL;
-    bas_init_obj.support_notification = true;
-    bas_init_obj.p_report_ref = NULL;
-    bas_init_obj.initial_batt_level = 100;
-
-    bas_init_obj.bl_rd_sec = SEC_JUST_WORKS;
-    bas_init_obj.bl_cccd_wr_sec = SEC_JUST_WORKS;
-    bas_init_obj.bl_report_rd_sec = SEC_JUST_WORKS;
-
-    err_code = ble_bas_init(&m_bas, &bas_init_obj);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -752,8 +605,8 @@ static void hids_init(void)
 static void services_init(void)
 {
     qwr_init();
-    dis_init();
-    bas_init();
+    ble_device_info_dis_init();
+    ble_battery_bas_init();
     hids_init();
 }
 
@@ -793,10 +646,6 @@ static void conn_params_init(void)
  */
 static void timers_start(void)
 {
-    ret_code_t err_code;
-
-    err_code = app_timer_start(m_battery_timer_id, BATTERY_LEVEL_MEAS_INTERVAL, NULL);
-    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for putting the chip into sleep mode.
@@ -1357,6 +1206,7 @@ static void bsp_event_handler(bsp_event_t event)
 {
     ret_code_t err_code;
     static bool wasLongPress = false;
+    
 
     NRF_LOG_INFO("bsp_event_handler %d", event);
 
@@ -1385,33 +1235,53 @@ static void bsp_event_handler(bsp_event_t event)
             }
         }
         break;
-
-    case APP_BSP_EVENT_BTN_1_PRESSED:
-        bsp_board_led_on(BSP_BOARD_LED_0);
-        break;
-    case APP_BSP_EVENT_BTN_1_RELEASED:
-        bsp_board_led_off(BSP_BOARD_LED_0);
-        break;
-    case APP_BSP_EVENT_BTN_1_LONG_PRESS:
-
-        break;
-    case APP_BSP_EVENT_BTN_ENC_PRESSED:
-        wasLongPress = false;
-        break;
-    case APP_BSP_EVENT_BTN_ENC_RELEASED:
-        if(!wasLongPress)
-        {
-            mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
-        }
-        mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
-        break;
-    case APP_BSP_EVENT_BTN_ENC_LONG_PRESS:
-        wasLongPress = true;
-        mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeIncrement);
-        break;
-
     default:
-        break;
+        switch((enum APP_BSP_EVENT)event)
+        {
+        case APP_BSP_EVENT_BTN_1_PRESSED:
+            bsp_board_led_on(BSP_BOARD_LED_0);
+            break;
+        case APP_BSP_EVENT_BTN_1_RELEASED:
+            bsp_board_led_off(BSP_BOARD_LED_0);
+            break;
+        case APP_BSP_EVENT_BTN_1_LONG_PRESS:
+
+            break;
+        case APP_BSP_EVENT_BTN_ENC_PRESSED:
+            wasLongPress = false;
+            break;
+        case APP_BSP_EVENT_BTN_ENC_RELEASED:
+            if(!wasLongPress)
+            {
+                //mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
+            }
+            if(wasLongPress)
+            {
+                panelToggle = !panelToggle;
+                if(panelToggle)
+                {
+                    bsp_board_led_on(BSP_BOARD_LED_0);
+                }
+                else
+                {
+                    bsp_board_led_off(BSP_BOARD_LED_0);
+                }
+            }
+            else
+            {
+                mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
+                mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
+            }
+            //mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
+            break;
+        case APP_BSP_EVENT_BTN_ENC_LONG_PRESS:
+            wasLongPress = true;
+            //mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeIncrement);
+            break;
+
+        default:
+            break;
+        }
     }
 }
 
@@ -1434,12 +1304,12 @@ static void buttons_leds_init(bool *p_erase_bonds)
         enum APP_BSP_EVENT event;
     } map[] = 
     {
-        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_PUSH, APP_BSP_EVENT_BTN_1_PRESSED},
-        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_RELEASE, APP_BSP_EVENT_BTN_1_RELEASED},
+        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_PUSH,      APP_BSP_EVENT_BTN_1_PRESSED},
+        {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_RELEASE,   APP_BSP_EVENT_BTN_1_RELEASED},
         {BSP_BUTTON_BOARD, BSP_BUTTON_ACTION_LONG_PUSH, APP_BSP_EVENT_BTN_1_LONG_PRESS},
-        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_PUSH, APP_BSP_EVENT_BTN_ENC_PRESSED},
-        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_RELEASE, APP_BSP_EVENT_BTN_ENC_RELEASED},
-        {BSP_BUTTON_ENC, BSP_BUTTON_ACTION_LONG_PUSH, APP_BSP_EVENT_BTN_ENC_LONG_PRESS},
+        {BSP_BUTTON_ENC,   BSP_BUTTON_ACTION_PUSH,      APP_BSP_EVENT_BTN_ENC_PRESSED},
+        {BSP_BUTTON_ENC,   BSP_BUTTON_ACTION_RELEASE,   APP_BSP_EVENT_BTN_ENC_RELEASED},
+        {BSP_BUTTON_ENC,   BSP_BUTTON_ACTION_LONG_PUSH, APP_BSP_EVENT_BTN_ENC_LONG_PRESS},
     };
 
     for(int i = 0; i < ARRAY_SIZE(map); i++)
@@ -1482,7 +1352,7 @@ static void idle_state_handle(void)
     app_sched_execute();
     if (NRF_LOG_PROCESS() == false)
     {
-        nrf_pwr_mgmt_run();
+        //nrf_pwr_mgmt_run();
     }
 }
 
@@ -1492,13 +1362,29 @@ void encoder_handler(encoder_direction_t dir)
     {
     case ENCODER_DIR_CW:
     {
-        mouse_wheel_send(1);
+        if(panelToggle)
+        {
+            mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeIncrement);
+            mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
+        }
+        else
+        {
+            mouse_wheel_send(1);
+        }
     }
     break;
 
     case ENCODER_DIR_CCW:
     {
-        mouse_wheel_send(-1);
+        if(panelToggle)
+        {
+            mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeDecrement);
+            mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
+        }
+        else
+        {
+            mouse_wheel_send(-1);
+        }
     }
     break;
 
@@ -1509,23 +1395,8 @@ void encoder_handler(encoder_direction_t dir)
 
 void battery_evt_handler(battery_status_t state)
 {
-    ret_code_t err_code;
-    uint8_t battery_level;
-
-    battery_level = state.proc;
-
-    err_code = ble_bas_battery_level_update(&m_bas, battery_level, BLE_CONN_HANDLE_ALL);
-    if ((err_code != NRF_SUCCESS) &&
-        (err_code != NRF_ERROR_BUSY) &&
-        (err_code != NRF_ERROR_RESOURCES) &&
-        (err_code != NRF_ERROR_FORBIDDEN) &&
-        (err_code != NRF_ERROR_INVALID_STATE) &&
-        (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING))
-    {
-        APP_ERROR_HANDLER(err_code);
-    }
+    NRF_LOG_INFO("mV: %d, proc: %d%%, state: %d", state.mv, state.proc, state.state);
 }
-
 
 
 /**@brief Function for application main entry.
@@ -1536,6 +1407,8 @@ int main(void)
 
     // Initialize.
     log_init();
+    NRF_LOG_INFO("HID Mouse example started.");
+
     timers_init();
     buttons_leds_init(&erase_bonds);
     power_management_init();
@@ -1550,7 +1423,6 @@ int main(void)
     encoder_init(encoder_handler);
 
     // Start execution.
-    NRF_LOG_INFO("HID Mouse example started.");
     timers_start();
     advertising_start(erase_bonds);
 

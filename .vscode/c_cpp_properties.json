@@ -36,12 +36,18 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
+                "DCONFIG_NFCT_PINS_AS_GPIOS",
+                "__GNUC__",
+                "APP_TIMER_V2",
+                "APP_TIMER_V2_RTC1_ENABLED",
                 "BOARD_CUSTOM",
                 "CONFIG_GPIO_AS_PINRESET",
                 "FLOAT_ABI_HARD",
                 "NRF52840_XXAA",
-                "DCONFIG_NFCT_PINS_AS_GPIOS",
-                "__GNUC__"
+                "NRF_SD_BLE_API_VERSION",
+                "S140",
+                "SOFTDEVICE_PRESENT",
+                "DEBUG"
             ]
         }
     ],

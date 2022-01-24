@@ -46,3 +46,6 @@
 
 #include "encoder.h"
 #include "battery.h"
+#include "ble_battery.h"
+#include "about.h"
+#include "ble_device_info.h"

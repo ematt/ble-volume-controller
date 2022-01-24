@@ -95,6 +95,8 @@ SRC_FILES += \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c \
   $(PROJ_DIR)/src/encoder.c \
   $(PROJ_DIR)/src/battery.c \
+  $(PROJ_DIR)/src/ble_battery.c \
+  $(PROJ_DIR)/src/ble_device_info.c \
   $(PROJ_DIR)/src/main.c \
 
 # Include folders common to all targets

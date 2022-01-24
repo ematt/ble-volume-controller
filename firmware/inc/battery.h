@@ -1,8 +1,9 @@
-#ifndef _BATTERY_H_
-#define _BATTERY_H_
+#ifndef BATTERY_H_
+#define BATTERY_H_
 
 enum BATTERY_STATUS_STATE {
-    BATTERY_STATUS_STATE_CHARGING = 0,
+    BATTERY_STATUS_STATE_UNKNOWN = 0,
+    BATTERY_STATUS_STATE_CHARGING,
     BATTERY_STATUS_STATE_DISCHARGING,
     BATTERY_STATUS_STATE_WARNING,
     BATTERY_STATUS_STATE_DEPLETED,
@@ -27,4 +28,4 @@ void battery_init(battery_evt_handler_t evt_handler);
 void battery_run(void);
 
 
-#endif // _BATTERY_H_
+#endif // BATTERY_H_
