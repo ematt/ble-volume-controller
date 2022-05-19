@@ -9,7 +9,7 @@
 	  "./.includes/lib/gcc/arm-none-eabi/9.3.1/include"
 	],
 	"actionButtons": {
-		"reloadButton": "♻️", // Custom reload button text or icon (default ↻). null value enables automatic reload on configuration change
+		"reloadButton": "♻️",
 		"commands": [
 			{
 				"name": "Build docker image",
@@ -19,27 +19,27 @@
 			{
 				"name": "Docker run",
 				"singleInstance": true,
-				"command": "docker run -dit --name ${workspaceFolderBasename} -v `${workspaceFolder}`:/project -v `C:/nRF5/nRF5_SDK_17.1.0_ddde560`:/sdk ${workspaceFolderBasename}:gcc-9.3.1", // This is executed in the terminal.
+				"command": "docker run -dit --name ${workspaceFolderBasename} -v `${workspaceFolder}`:/project ${workspaceFolderBasename}:gcc-9.3.1",
 			},
 			{
 				"name": "Build",
 				"singleInstance": true,
-				"command": "docker exec -it ${workspaceFolderBasename} bash -c 'cd /project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make -j`nproc`'", // This is executed in the terminal.
+				"command": "docker exec -it ${workspaceFolderBasename} bash -c 'cd /project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make -j`nproc`'",
 			},
 			{
 				"name": "Gen DFU",
 				"singleInstance": true,
-				"command": "cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip",
+				"command": "docker exec -it ${workspaceFolderBasename} bash -c 'cd /project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make create_dfu'",
 			},
 			{
 				"name": "Flash",
 				"singleInstance": true,
-				"command": "cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM11 -b 115200 --singlebank --touch 1200",
+				"command": "cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM5 -b 115200 --singlebank --touch 1200",
 			},
 			{
 				"name": "make & flash",
 				"singleInstance": true,
-				"command": "docker exec -it ${workspaceFolderBasename} bash -c 'cd /project/firmware/sparkfun_nrf52840_mini/s140/armgcc; make -j`nproc`';cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil dfu genpkg --sd-req 0xFFFE --dev-type 0x0052 --application _build/nrf52840_xxaa.hex  _build/dfu-package.zip; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM11 -b 115200 --singlebank --touch 1200",
+				"command": "docker exec -it ${workspaceFolderBasename} bash -c 'cd /project/firmware/sparkfun_nrf52840_mini/s140/armgcc && make -j`nproc` && make create_dfu'; cd ${workspaceFolder}/firmware/sparkfun_nrf52840_mini/s140/armgcc; adafruit-nrfutil --verbose dfu serial --package _build/dfu-package.zip -p COM5 -b 115200 --singlebank --touch 1200",
 			}
 		]
 	}

@@ -2884,7 +2884,7 @@
 // <e> NRFX_QDEC_ENABLED - nrfx_qdec - QDEC peripheral driver
 //==========================================================
 #ifndef NRFX_QDEC_ENABLED
-#define NRFX_QDEC_ENABLED 0
+#define NRFX_QDEC_ENABLED 1
 #endif
 // <o> NRFX_QDEC_CONFIG_REPORTPER  - Report period
  
@@ -2898,7 +2898,7 @@
 // <7=> 280 Samples 
 
 #ifndef NRFX_QDEC_CONFIG_REPORTPER
-#define NRFX_QDEC_CONFIG_REPORTPER 0
+#define NRFX_QDEC_CONFIG_REPORTPER 7
 #endif
 
 // <o> NRFX_QDEC_CONFIG_SAMPLEPER  - Sample period
@@ -2913,28 +2913,28 @@
 // <7=> 16384 us 
 
 #ifndef NRFX_QDEC_CONFIG_SAMPLEPER
-#define NRFX_QDEC_CONFIG_SAMPLEPER 7
+#define NRFX_QDEC_CONFIG_SAMPLEPER 0
 #endif
 
 // <o> NRFX_QDEC_CONFIG_PIO_A - A pin  <0-31> 
 
 
 #ifndef NRFX_QDEC_CONFIG_PIO_A
-#define NRFX_QDEC_CONFIG_PIO_A 31
+#define NRFX_QDEC_CONFIG_PIO_A 22
 #endif
 
 // <o> NRFX_QDEC_CONFIG_PIO_B - B pin  <0-31> 
 
 
 #ifndef NRFX_QDEC_CONFIG_PIO_B
-#define NRFX_QDEC_CONFIG_PIO_B 31
+#define NRFX_QDEC_CONFIG_PIO_B 23
 #endif
 
 // <o> NRFX_QDEC_CONFIG_PIO_LED - LED pin  <0-31> 
 
 
 #ifndef NRFX_QDEC_CONFIG_PIO_LED
-#define NRFX_QDEC_CONFIG_PIO_LED 31
+#define NRFX_QDEC_CONFIG_PIO_LED NRF_QDEC_LED_NOT_CONNECTED
 #endif
 
 // <o> NRFX_QDEC_CONFIG_LEDPRE - LED pre 
@@ -5063,7 +5063,7 @@
 // <e> QDEC_ENABLED - nrf_drv_qdec - QDEC peripheral driver - legacy layer
 //==========================================================
 #ifndef QDEC_ENABLED
-#define QDEC_ENABLED 0
+#define QDEC_ENABLED 1
 #endif
 // <o> QDEC_CONFIG_REPORTPER  - Report period
  
@@ -5077,7 +5077,7 @@
 // <7=> 280 Samples 
 
 #ifndef QDEC_CONFIG_REPORTPER
-#define QDEC_CONFIG_REPORTPER 0
+#define QDEC_CONFIG_REPORTPER 7
 #endif
 
 // <o> QDEC_CONFIG_SAMPLEPER  - Sample period
@@ -5092,28 +5092,28 @@
 // <7=> 16384 us 
 
 #ifndef QDEC_CONFIG_SAMPLEPER
-#define QDEC_CONFIG_SAMPLEPER 7
+#define QDEC_CONFIG_SAMPLEPER 0
 #endif
 
 // <o> QDEC_CONFIG_PIO_A - A pin  <0-31> 
 
 
 #ifndef QDEC_CONFIG_PIO_A
-#define QDEC_CONFIG_PIO_A 31
+#define QDEC_CONFIG_PIO_A 22
 #endif
 
 // <o> QDEC_CONFIG_PIO_B - B pin  <0-31> 
 
 
 #ifndef QDEC_CONFIG_PIO_B
-#define QDEC_CONFIG_PIO_B 31
+#define QDEC_CONFIG_PIO_B 23
 #endif
 
 // <o> QDEC_CONFIG_PIO_LED - LED pin  <0-31> 
 
 
 #ifndef QDEC_CONFIG_PIO_LED
-#define QDEC_CONFIG_PIO_LED 31
+#define QDEC_CONFIG_PIO_LED NRF_QDEC_LED_NOT_CONNECTED
 #endif
 
 // <o> QDEC_CONFIG_LEDPRE - LED pre 

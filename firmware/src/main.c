@@ -606,7 +606,6 @@ static void services_init(void)
 {
     qwr_init();
     ble_device_info_dis_init();
-    ble_battery_bas_init();
     hids_init();
 }
 
@@ -1358,6 +1357,7 @@ static void idle_state_handle(void)
 
 void encoder_handler(encoder_direction_t dir)
 {
+    NRF_LOG_INFO("encoder_handler");
     switch (dir)
     {
     case ENCODER_DIR_CW:
@@ -1393,12 +1393,6 @@ void encoder_handler(encoder_direction_t dir)
     }
 }
 
-void battery_evt_handler(battery_status_t state)
-{
-    NRF_LOG_INFO("mV: %d, proc: %d%%, state: %d", state.mv, state.proc, state.state);
-}
-
-
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -1407,7 +1401,7 @@ int main(void)
 
     // Initialize.
     log_init();
-    NRF_LOG_INFO("HID Mouse example started.");
+    NRF_LOG_INFO(ABOUT_PROJECT_NAME " started.");
 
     timers_init();
     buttons_leds_init(&erase_bonds);
@@ -1425,9 +1419,6 @@ int main(void)
     // Start execution.
     timers_start();
     advertising_start(erase_bonds);
-
-    
-    battery_init(battery_evt_handler);
 
     // Enter main loop.
     for (;;)

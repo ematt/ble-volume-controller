@@ -1,7 +1,7 @@
 #ifndef ABOUT_H_
 #define ABOUT_H_
 
-#define ABOUT_PROJECT_NAME "Test"
+#define ABOUT_PROJECT_NAME "Ble HID controller"
 
 #define ABOUT_FIRMWARE_REV_MAJOR    0           ///< Major firmware version.
 #define ABOUT_FIRMWARE_REV_MINOR    0           ///< Minor firmware version.
