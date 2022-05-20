@@ -1,5 +1,7 @@
 #include "includes.h"
 
+#include "usb_serial.h"
+
 #define NRF_LOG_MODULE_NAME main
 #define NRF_LOG_LEVEL NRF_LOG_SEVERITY_INFO
 #include <log/nrf_log.h>
@@ -1395,6 +1397,7 @@ int main(void)
     // Initialize.
     log_init();
     NRF_LOG_INFO(ABOUT_PROJECT_NAME " started.");
+    usb_serial_init();
 
     timers_init();
     buttons_leds_init(&erase_bonds);
@@ -1416,6 +1419,7 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+        usb_serial_loop();
         idle_state_handle();
     }
 }

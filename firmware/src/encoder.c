@@ -14,9 +14,6 @@ NRF_LOG_MODULE_REGISTER();
 #include "error_codes.h"
 #include "encoder.h"
 
-#define ENC_PIN_A BSP_QSPI_IO2_PIN
-#define ENC_PIN_B BSP_QSPI_IO3_PIN
-
 const uint32_t DEBOUNCE_TIME_MS = 4;
 
 static enc_evt_handler_t enc_evt_handler = NULL;
