@@ -15,7 +15,6 @@
 #include "ble_advdata.h"
 #include "ble_hids.h"
 #include "ble_bas.h"
-#include "ble_dis.h"
 #include "ble_conn_params.h"
 #include "sensorsim.h"
 #include "bsp.h"
@@ -41,8 +40,6 @@
 
 #include "nrfx_timer.h"
 #include "nrf_timer.h"
-
-#include "nrf_saadc.h"
 
 #include "error_codes.h"
 #include "encoder.h"

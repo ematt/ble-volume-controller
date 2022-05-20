@@ -22,6 +22,12 @@ typedef struct {
  */
 typedef void (*enc_evt_handler_t)(encoder_event_t dir);
 
+/**
+ * @brief Initialize encoder
+ * 
+ * @param evt_handler callback for encoder event
+ * @return int ESUCCESS for success or errno for error
+ */
 int encoder_init(enc_evt_handler_t evt_handler);
 
 

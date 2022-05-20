@@ -2,9 +2,9 @@
 
 #define NRF_LOG_MODULE_NAME main
 #define NRF_LOG_LEVEL NRF_LOG_SEVERITY_INFO
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
+#include <log/nrf_log.h>
+#include <log/nrf_log_ctrl.h>
+#include <log/nrf_log_default_backends.h>
 NRF_LOG_MODULE_REGISTER();
 
 #define DEVICE_NAME ABOUT_PROJECT_NAME                 /**< Name of device. Will be included in the advertising data. */
@@ -1249,10 +1249,6 @@ static void bsp_event_handler(bsp_event_t event)
             wasLongPress = false;
             break;
         case APP_BSP_EVENT_BTN_ENC_RELEASED:
-            if(!wasLongPress)
-            {
-                //mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
-            }
             if(wasLongPress)
             {
                 panelToggle = !panelToggle;
@@ -1270,11 +1266,9 @@ static void bsp_event_handler(bsp_event_t event)
                 mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
                 mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
             }
-            //mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
             break;
         case APP_BSP_EVENT_BTN_ENC_LONG_PRESS:
             wasLongPress = true;
-            //mouse_ConsumerControl_send(CONSUMER_BUTTON_VolumeIncrement);
             break;
 
         default:

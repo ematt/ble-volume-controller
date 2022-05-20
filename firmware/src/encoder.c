@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "includes.h"
+#include <nrf_drv_qdec.h>
+#include <hal/nrf_gpio.h>
 
 #define NRF_LOG_MODULE_NAME encoder
 #define NRF_LOG_LEVEL NRF_LOG_SEVERITY_DEBUG
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
-#include "nrf_drv_qdec.h"
+#include <log/nrf_log.h>
+#include <log/nrf_log_ctrl.h>
+#include <log/nrf_log_default_backends.h>
 NRF_LOG_MODULE_REGISTER();
+
+#include "error_codes.h"
+#include "encoder.h"
 
 #define ENC_PIN_A BSP_QSPI_IO2_PIN
 #define ENC_PIN_B BSP_QSPI_IO3_PIN
