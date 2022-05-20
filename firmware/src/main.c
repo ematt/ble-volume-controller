@@ -27,7 +27,6 @@ NRF_LOG_MODULE_REGISTER();
 #define SEC_PARAM_LESC 0                               /**< LE Secure Connections not enabled. */
 #define SEC_PARAM_KEYPRESS 0                           /**< Keypress notifications not enabled. */
 #define SEC_PARAM_IO_CAPABILITIES BLE_GAP_IO_CAPS_NONE /**< No I/O capabilities. */
-//#define SEC_PARAM_IO_CAPABILITIES BLE_GAP_IO_CAPS_DISPLAY_ONLY /**< No I/O capabilities. */
 
 #define SEC_PARAM_OOB 0                                /**< Out Of Band data not available. */
 #define SEC_PARAM_MIN_KEY_SIZE 7                       /**< Minimum encryption key size. */
@@ -1355,10 +1354,10 @@ static void idle_state_handle(void)
     }
 }
 
-void encoder_handler(encoder_direction_t dir)
+void encoder_handler(encoder_event_t evt)
 {
     NRF_LOG_INFO("encoder_handler");
-    switch (dir)
+    switch (evt.direction)
     {
     case ENCODER_DIR_CW:
     {
@@ -1369,7 +1368,7 @@ void encoder_handler(encoder_direction_t dir)
         }
         else
         {
-            mouse_wheel_send(1);
+            mouse_wheel_send(evt.steps);
         }
     }
     break;
@@ -1383,7 +1382,7 @@ void encoder_handler(encoder_direction_t dir)
         }
         else
         {
-            mouse_wheel_send(-1);
+            mouse_wheel_send(-1 * evt.steps);
         }
     }
     break;

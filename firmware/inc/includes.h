@@ -44,6 +44,7 @@
 
 #include "nrf_saadc.h"
 
+#include "error_codes.h"
 #include "encoder.h"
 #include "about.h"
 #include "ble_device_info.h"
