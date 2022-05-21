@@ -25,8 +25,6 @@ static void qdec_event_handler(nrf_drv_qdec_event_t event)
 {
     if (event.type == NRF_QDEC_EVENT_REPORTRDY)
     {
-        NRF_LOG_DEBUG("%d %d", event.data.report.accdbl, event.data.report.acc);
-
         const encoder_event_t evt = {
             .direction = event.data.report.acc > 0 ? ENCODER_DIR_CCW : ENCODER_DIR_CW,
             .steps = abs(event.data.report.acc)

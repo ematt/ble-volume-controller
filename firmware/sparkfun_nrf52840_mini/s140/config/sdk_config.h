@@ -2515,7 +2515,7 @@
 // <e> NRFX_POWER_ENABLED - nrfx_power - POWER peripheral driver
 //==========================================================
 #ifndef NRFX_POWER_ENABLED
-#define NRFX_POWER_ENABLED 0
+#define NRFX_POWER_ENABLED 1
 #endif
 // <o> NRFX_POWER_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -5967,7 +5967,7 @@
 // <e> USBD_ENABLED - nrf_drv_usbd - Software Component
 //==========================================================
 #ifndef USBD_ENABLED
-#define USBD_ENABLED 0
+#define USBD_ENABLED 1
 #endif
 // <o> USBD_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -6480,7 +6480,7 @@
  
 
 #ifndef APP_USBD_STRING_SERIAL_EXTERN
-#define APP_USBD_STRING_SERIAL_EXTERN 0
+#define APP_USBD_STRING_SERIAL_EXTERN 1
 #endif
 
 // <s> APP_USBD_STRING_SERIAL - String descriptor for the serial number.
@@ -6488,7 +6488,7 @@
 // <i> Note: This value is not editable in Configuration Wizard.
 // <i> Serial number that is defined the same way like in @ref APP_USBD_STRINGS_MANUFACTURER.
 #ifndef APP_USBD_STRING_SERIAL
-#define APP_USBD_STRING_SERIAL APP_USBD_STRING_DESC("000000000000")
+#define APP_USBD_STRING_SERIAL g_extern_serial_number
 #endif
 
 // </e>
@@ -6733,7 +6733,7 @@
  
 
 #ifndef HARDFAULT_HANDLER_ENABLED
-#define HARDFAULT_HANDLER_ENABLED 0
+#define HARDFAULT_HANDLER_ENABLED 1
 #endif
 
 // <e> HCI_MEM_POOL_ENABLED - hci_mem_pool - memory pool implementation used by HCI
@@ -8674,7 +8674,7 @@
 // <e> SAADC_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef SAADC_CONFIG_LOG_ENABLED
-#define SAADC_CONFIG_LOG_ENABLED 1
+#define SAADC_CONFIG_LOG_ENABLED 0
 #endif
 // <o> SAADC_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -9139,7 +9139,7 @@
 // <e> APP_BUTTON_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef APP_BUTTON_CONFIG_LOG_ENABLED
-#define APP_BUTTON_CONFIG_LOG_ENABLED 1
+#define APP_BUTTON_CONFIG_LOG_ENABLED 0
 #endif
 // <o> APP_BUTTON_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -9335,7 +9335,7 @@
 // <4=> Debug 
 
 #ifndef APP_USBD_CONFIG_LOG_LEVEL
-#define APP_USBD_CONFIG_LOG_LEVEL 3
+#define APP_USBD_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> APP_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.

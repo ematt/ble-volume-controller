@@ -1251,19 +1251,7 @@ static void bsp_event_handler(bsp_event_t event)
             wasLongPress = false;
             break;
         case APP_BSP_EVENT_BTN_ENC_RELEASED:
-            if(wasLongPress)
-            {
-                panelToggle = !panelToggle;
-                if(panelToggle)
-                {
-                    bsp_board_led_on(BSP_BOARD_LED_0);
-                }
-                else
-                {
-                    bsp_board_led_off(BSP_BOARD_LED_0);
-                }
-            }
-            else
+            if(!wasLongPress)
             {
                 mouse_ConsumerControl_send(CONSUMER_BUTTON_PlayPause);
                 mouse_ConsumerControl_send(CONSUMER_BUTTON_ReleaseAll);
@@ -1271,6 +1259,15 @@ static void bsp_event_handler(bsp_event_t event)
             break;
         case APP_BSP_EVENT_BTN_ENC_LONG_PRESS:
             wasLongPress = true;
+            panelToggle = !panelToggle;
+            if(panelToggle)
+            {
+                bsp_board_led_on(BSP_BOARD_LED_0);
+            }
+            else
+            {
+                bsp_board_led_off(BSP_BOARD_LED_0);
+            }
             break;
 
         default:
@@ -1346,13 +1343,12 @@ static void idle_state_handle(void)
     app_sched_execute();
     if (NRF_LOG_PROCESS() == false)
     {
-        //nrf_pwr_mgmt_run();
+        nrf_pwr_mgmt_run();
     }
 }
 
 void encoder_handler(encoder_event_t evt)
 {
-    NRF_LOG_INFO("encoder_handler");
     switch (evt.direction)
     {
     case ENCODER_DIR_CW:

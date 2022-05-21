@@ -25,7 +25,7 @@ extern "C" {
 #define BUTTONS_NUMBER 2
 
 #define BUTTON_1       13
-#define BUTTON_2       9
+#define BUTTON_2       21
 #define BUTTON_PULL    3
 
 #define BUTTONS_ACTIVE_STATE 0
