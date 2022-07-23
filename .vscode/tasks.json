@@ -13,7 +13,7 @@
                 "-it", "${workspaceFolderBasename}",
                 "sh",
                 "-c",
-				"mkdir -p /project/.includes && find . -name \"*.h\" | xargs cp --parents -t /project/.includes && cp -R /sdk /project/.includes",
+				"rm -R /project/.includes && mkdir -p /project/.includes && find . -name \"*.h\" | xargs cp --parents -t /project/.includes && cp -R /sdk /project/.includes",
             ],
             "group": {
                 "kind": "build",
